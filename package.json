@@ -1,0 +1,25 @@
+{
+  "name": "truffle",
+  "version": "1.0.0",
+  "description": "",
+  "main": "truffle.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sibizulu/ERCToken.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sibizulu/ERCToken/issues"
+  },
+  "homepage": "https://github.com/sibizulu/ERCToken#readme",
+  "dependencies": {
+    "web3": "^1.0.0-beta.34"
+  }
+}
