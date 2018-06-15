@@ -36,9 +36,9 @@ interface ERC223 {
     event Transfer(address indexed from, address indexed to, uint value, bytes indexed data);
 }
 interface ERC20 {
-    function transferFrom(address _from, address _to, uint _value) public returns (bool);
-    function approve(address _spender, uint _value) public returns (bool);
-    function allowance(address _owner, address _spender) public constant returns (uint);
+    function transferFrom(address _from, address _to, uint _value) external returns (bool);
+    function approve(address _spender, uint _value) external returns (bool);
+    function allowance(address _owner, address _spender) external constant returns (uint);
     event Approval(address indexed _owner, address indexed _spender, uint _value);
 }
 contract ERC223ReceivingContract {
@@ -57,7 +57,7 @@ contract Ownable {
    * @dev The Ownable constructor sets the original `owner` of the contract to the sender
    * account.
    */
-  function Ownable() internal{
+  constructor () internal{
     owner = msg.sender;
   }
 
@@ -78,7 +78,7 @@ contract Ownable {
     owner = newOwner;
   }
 }
-contract AToken is Ownable{
+contract aToken is Ownable{
 
     string internal _symbol;
     string internal _name;
@@ -87,7 +87,7 @@ contract AToken is Ownable{
     mapping (address => uint256) internal _balanceOf;
     mapping (address => mapping (address => uint256)) internal _allowed;
 
-    function AToken(string symbol, string name, uint8 decimals, uint totalSupply) public {
+    constructor(string symbol, string name, uint8 decimals, uint totalSupply) public {
         _symbol = symbol;
         _name = name;
         _decimals = decimals;
@@ -121,12 +121,12 @@ contract AToken is Ownable{
 
 /** uint256 public constant _totalSupply = 500000000 * 10**18; */
 }
-contract ERCToken is AToken("ERCCoin", "ERC Token", 18, 500000000), ERC20, ERC223 {
+contract ERCToken is aToken("ERCCoin", "ERC Token", 18, 500000000), ERC20, ERC223 {
     using SafeMath for uint256;
 
     event TokenTransferRequest(string method,address from, address backer, uint amount);
 
-    function ERCToken() public {
+    constructor() public {
         _balanceOf[msg.sender] = _totalSupply;
     }
 
@@ -139,34 +139,34 @@ contract ERCToken is AToken("ERCCoin", "ERC Token", 18, 500000000), ERC20, ERC22
     }
 
     function transfer(address _to, uint _value) public returns (bool) {
-        TokenTransferRequest("transfer",msg.sender, _to, _value);
+        emit TokenTransferRequest("transfer",msg.sender, _to, _value);
         if (_value > 0 &&
             _value <= _balanceOf[msg.sender]
             ){
             _balanceOf[msg.sender] = _balanceOf[msg.sender].sub(_value);
             _balanceOf[_to] = _balanceOf[_to].add(_value);
-            Transfer(msg.sender, _to, _value);
+            emit Transfer(msg.sender, _to, _value);
             return true;
         }
         return false;
     }
 
     function transfer(address _to, uint _value, bytes _data) public returns (bool) {
-        TokenTransferRequest("transfer_erc223",msg.sender, _to, _value);
+       emit TokenTransferRequest("transfer_erc223",msg.sender, _to, _value);
         if (_value > 0 &&
             _value <= _balanceOf[msg.sender]) {
             _balanceOf[msg.sender] = _balanceOf[msg.sender].sub(_value);
             _balanceOf[_to] = _balanceOf[_to].add(_value);
             ERC223ReceivingContract _contract = ERC223ReceivingContract(_to);
                 _contract.tokenFallback(msg.sender, _value, _data);
-            Transfer(msg.sender, _to, _value, _data);
+           emit Transfer(msg.sender, _to, _value, _data);
             return true;
         }
         return false;
     }
 
     function transferFrom(address _from, address _to, uint _value) public returns (bool) {
-       TokenTransferRequest("transferFrom",_from, _to, _value);
+      emit TokenTransferRequest("transferFrom",_from, _to, _value);
        if (
             _value > 0 &&
             _balanceOf[_from] >= _value) {
@@ -175,7 +175,7 @@ contract ERCToken is AToken("ERCCoin", "ERC Token", 18, 500000000), ERC20, ERC22
             if (_allowed[_from][msg.sender] >= _value){
                 _allowed[_from][msg.sender] = _allowed[_from][msg.sender].sub(_value);
             }
-            Transfer(_from, _to, _value);
+           emit Transfer(_from, _to, _value);
             return true;
         }
         return false;
@@ -183,7 +183,7 @@ contract ERCToken is AToken("ERCCoin", "ERC Token", 18, 500000000), ERC20, ERC22
 
     function approve(address _spender, uint _value) public returns (bool) {
         _allowed[msg.sender][_spender] = _value;
-        Approval(msg.sender, _spender, _value);
+      emit Approval(msg.sender, _spender, _value);
         return true;
     }
 
