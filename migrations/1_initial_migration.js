@@ -1,5 +1,14 @@
-var Migrations = artifacts.require("./Migrations.sol");
+var Migrations = artifacts.require('./Migrations.sol');
+var Web3 = require('web3');
+
+var web3 = new Web3(
+  new Web3.providers.HttpProvider('http://192.168.27.101:8545')
+);
 
 module.exports = function(deployer) {
-  deployer.deploy(Migrations);
+  web3.eth.personal
+    .unlockAccount(web3.eth.accounts[0], '123', 15000)
+    .then(() => {
+      deployer.deploy(Migrations);
+    });
 };
